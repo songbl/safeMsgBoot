@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.songbl.safemsg.app.dao.ContactsGroupDao">
+
+    <!--    /	private long groupId;-->
+    <!--    private String groupName;-->
+    <!--    private int userId;-->
+    <!--    //组对用用户  多对一(多个组对应一个用户)-->
+    <!--    private UserEntity userEntity ;-->
+    <!-- 1.查询一个用户下的组及该用户信息  .查询用户、组   -->
+    <resultMap id="userAndGroup" type="com.songbl.safemsg.app.entity.UserAndGroupEntity">
+        <result property="groupId" column="groupId"/>
+        <result property="groupName" column="groupname"/>
+        <!--        @TableId-->
+        <!--        private Long userId;-->
+        <!--        private String username;-->
+        <!--        private String mobile;-->
+        <!--        private int gender ;-->
+        <association property="userEntity" javaType="com.songbl.safemsg.app.entity.UserEntity">
+            <result property="userId" column="uid"></result>
+            <result property="username" column="username"></result>
+            <result property="mobile" column="mobile"></result>
+            <result property="gender" column="gender"></result>
+        </association>
+    </resultMap>
+    <!--  1.查询用户、组、联系人 = 查询一个用户下的组及该用户信息   -->
+    <select id="queryUserAndListById" resultMap="userAndGroup">
+		SELECT u.user_id uid,u.username ,u.mobile,u.gender,g.group_name groupname, g.group_id groupId
+        FROM tb_cont_group g,tb_user u
+        WHERE u.user_id = g.user_id
+        and u.user_id = #{uId};
+	</select>
+
+    <!--  2.查询用户、组、联系人    -->
+    <resultMap id="userAndGroupAndContacts" type="com.songbl.safemsg.app.entity.UserAndGroupEntity">
+        <result property="groupId" column="groupId"/>
+        <result property="groupName" column="groupname"/>
+        <association property="userEntity" javaType="com.songbl.safemsg.app.entity.UserEntity">
+            <result property="userId" column="uid"></result>
+            <result property="username" column="username"></result>
+            <result property="mobile" column="mobile"></result>
+            <result property="gender" column="gender"></result>
+        </association>
+        <collection property="contacts"  ofType="com.songbl.safemsg.app.entity.ContactsEntity">
+            <result property="contactsId" column="contacts_id"/>
+            <result property="contactsName" column="cname"/>
+            <result property="contactsMobile" column="contacts_mobile"/>
+            <result property="groupId" column="group_id"/>
+        </collection>
+    </resultMap>
+    <!--  2.查询一个用户下的组及该用户信息   -->
+    <select id="queryUserAndGroupAndContactsById" resultMap="userAndGroupAndContacts">
+	SELECT  t.uid,t.username,t.groupId ,t.groupname,tb_contacts.contacts_name cname,tb_contacts.contacts_mobile,tb_contacts.contacts_id,tb_contacts.group_id FROM
+    (SELECT u.user_id uid,u.username ,u.mobile,u.gender,g.group_name groupname, g.group_id groupId
+    FROM tb_cont_group g,tb_user u
+    WHERE u.user_id = g.user_id
+    and u.user_id = #{uId}) as t
+    Left JOIN tb_contacts
+    on tb_contacts.group_id = t.groupId;    -- 用 on ,对于左连接，
+	</select>
+
+
+
+
+
+
+
+
+
+    <!--   查询组里面联系人信息 -->
+<!--    <resultMap id="groupAndContacts" type="com.songbl.safemsgsg.app.entity.UserAndGroupEntity">-->
+<!--        <result property="groupId" column="groupId"/>-->
+<!--        <result property="groupName" column="groupname"/>-->
+<!--        <collection property="contacts"  ofType="com.songbl.safemsgsg.app.entity.ContactsEntity">-->
+<!--            <result property="contactsId" column="contacts_id"/>-->
+<!--            <result property="contactsName" column="cname"/>-->
+<!--            <result property="contactsMobile" column="contacts_mobile"/>-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+
+</mapper>
